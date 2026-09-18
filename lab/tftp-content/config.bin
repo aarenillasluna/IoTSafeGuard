@@ -1,0 +1,4 @@
+CONFIG-DUMP-VULNROUTER
+admin:VeryWeakPass2024!
+ssid:VulnHomeNetwork
+psk:password123

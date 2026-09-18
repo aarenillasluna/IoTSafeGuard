@@ -1,0 +1,50 @@
+# =============================================================================
+# IoTSafeGuard-Agent — dependencias Python
+# -----------------------------------------------------------------------------
+# Versiones FIJADAS a las del entorno con el que se ejecutó la suite (1269
+# pruebas en verde) sobre Python 3.12.3. Instalar con:
+#     pip install -r requirements.txt
+#
+# Solo figura lo que el código importa de verdad. La única excepción es boto3,
+# que no se importa directamente pero es lo que el SDK `anthropic` necesita
+# para firmar contra Bedrock con credenciales IAM.
+# =============================================================================
+
+# --- Motor de razonamiento ---------------------------------------------------
+anthropic==0.96.0              # Cliente Claude: API directa y AnthropicBedrock
+boto3==1.43.8                  # Firma SigV4 de Bedrock (dependencia de anthropic)
+
+# --- Reconocimiento de red y protocolos --------------------------------------
+python-nmap==0.7.1             # Wrapper de nmap (modules/recon.py)
+mac-vendor-lookup==0.1.12      # OUI → fabricante (modules/fingerprint.py)
+requests==2.33.1               # HTTP de interrogator, hnap y cve_api
+urllib3==2.6.3                 # Silencia los avisos TLS de las sondas HTTP
+websockets==16.0               # Tool execute_websocket + probe_lg_webos sobre TLS
+pythonping==1.1.4              # ICMP del SafetyMonitor (con fallback TCP)
+zeroconf==0.148.0              # mDNS / DNS-SD (modules/discovery.py)
+pysnmp==7.1.24                 # SNMP puro-Python (modules/snmp_probe.py)
+aiocoap==0.4.17                # CoAP .well-known/core (modules/discovery.py)
+mmh3==5.2.1                    # Hash de favicon estilo Shodan (interrogator)
+cryptography==46.0.7           # Parseo de certificados TLS (interrogator)
+
+# --- Parsing XML (SSDP/SOAP) -------------------------------------------------
+lxml==6.1.0                    # Parser rápido
+defusedxml==0.7.1              # Protección XXE: es el que se usa para parsear
+
+# --- Configuración, validación y logging -------------------------------------
+python-dotenv==1.2.2           # Carga de .env
+pydantic==2.13.3               # Validación de payloads del dashboard
+PyYAML==6.0.3                  # lab/ground_truth.yml (scripts/lab_scoring.py)
+loguru==0.7.2                  # Logging estructurado
+colorama==0.4.6                # Color en terminal
+
+# --- Observabilidad ----------------------------------------------------------
+langfuse==4.5.1                # Trazado del bucle. Opcional: sin claves es no-op
+
+# --- Dashboard (api/) --------------------------------------------------------
+fastapi==0.136.1               # Backend
+uvicorn[standard]==0.47.0      # ASGI + WebSocket del streaming en vivo + reload
+
+# --- Pruebas -----------------------------------------------------------------
+pytest==7.4.3
+pytest-cov==4.1.0

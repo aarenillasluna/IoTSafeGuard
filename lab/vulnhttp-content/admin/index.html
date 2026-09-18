@@ -1,0 +1,17 @@
+<!-- Panel admin REAL: protegido con HTTP Basic. Solo accesible con la credencial
+     filtrada por CVE-2021-33558 (admin / Sup3rS3cret!2024). Demuestra la cadena
+     completa: info-disclosure → acceso autenticado. Datos PLANTADOS (no reales). -->
+<html><head><title>VulnRouter-X1000 — Admin Console (authenticated)</title></head>
+<body>
+<h1>Admin Console</h1>
+<p>Authenticated as: <b>admin</b></p>
+<pre>
+=== Device control panel (privileged) ===
+firmware_upload : enabled (POST /admin/firmware)
+factory_reset   : POST /admin/reset
+wan_pppoe_user  : movistar@vulniot
+wan_pppoe_pass  : Pppo3-Vuln-2024
+vpn_psk         : 9c8b7a6d5e4f3a2b1c0d
+backup_download : /admin/config.bin
+</pre>
+</body></html>

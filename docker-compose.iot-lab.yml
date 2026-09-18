@@ -1,0 +1,152 @@
+# =============================================================================
+# IoT Lab Vulnerable — Servicios deliberadamente inseguros para evaluar el agente
+# -----------------------------------------------------------------------------
+# Levantar:
+#     docker compose -f docker-compose.iot-lab.yml up -d
+#
+# Auditar todo el lab (UNA sola IP, como un device IoT real):
+#     sudo ./venv/bin/python run.py --target 172.30.0.10 --auto --no-safety
+#
+# TOPOLOGÍA: todos los servicios comparten el network namespace del contenedor
+# `hub` (network_mode: service:hub) → aparecen en UNA IP fija (172.30.0.10) con
+# sus puertos ESTÁNDAR (21/23/502/554/1883/7547/8080/69). El hub tiene una MAC
+# con OUI Raspberry Pi → nmap detecta MAC + vendor + OS como en un device real.
+#
+# AISLAMIENTO: red bridge dedicada `iotlab` (172.30.0.0/24). Alcanzable SOLO
+# desde el host (gateway 172.30.0.1). NO se expone a la LAN real ni se publican
+# puertos en el host. Seguro para correr el telnet-shell-sin-auth.
+# =============================================================================
+
+networks:
+  iotlab:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+          gateway: 172.30.0.1
+
+services:
+
+  # --- Hub de red: sostiene la IP + MAC; el resto comparte su netns ---
+  hub:
+    image: docker.io/alpine:3.19
+    restart: unless-stopped
+    command: ["sleep", "infinity"]
+    mac_address: "dc:a6:32:1b:ad:01"   # OUI dc:a6:32 = Raspberry Pi Trading
+    networks:
+      iotlab:
+        ipv4_address: 172.30.0.10
+
+  # --- MQTT broker con anonymous access (1883) ---
+  mqtt:
+    image: docker.io/eclipse-mosquitto:2
+    restart: unless-stopped
+    network_mode: "service:hub"
+    depends_on: [hub]
+    volumes:
+      - ./lab/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  # --- Modbus TCP server, industrial sin auth (502) ---
+  # oitc/modbus-server cambió de CLI (--host/--port) a -f CONFIG_FILE.
+  modbus:
+    image: docker.io/oitc/modbus-server:latest
+    restart: unless-stopped
+    network_mode: "service:hub"
+    depends_on: [hub]
+    command: ["-f", "/app/modbus_server.json"]
+    volumes:
+      - ./lab/modbus_server.json:/app/modbus_server.json:ro
+
+  # --- RTSP stream sin auth (554), cámara simulada ---
+  # mediamtx dejó de aceptar MTX_AUTHMETHOD=none. Anon read/publish es el default.
+  # Forzamos RTSP a 554 y apagamos protocolos extra para una superficie limpia.
+  rtsp:
+    image: docker.io/bluenviron/mediamtx:latest
+    restart: unless-stopped
+    network_mode: "service:hub"
+    depends_on: [hub]
+    environment:
+      MTX_RTSPADDRESS: ":554"
+      MTX_RTSPTRANSPORTS: tcp
+      MTX_RTMP: "no"
+      MTX_HLS: "no"
+      MTX_WEBRTC: "no"
+      MTX_SRT: "no"
+
+  # --- Cámara simulada: publica un stream en el RTSP de arriba ---
+  #
+  # Sin esto, MediaMTX responde a OPTIONS pero no tiene NADA que servir, así
+  # que un DESCRIBE no devuelve `m=video` y `probe_rtsp` —correctamente, desde
+  # el guard AirPlay de iter_12— no emite `RTSP-NO-AUTH`. El vector
+  # `rtsp-no-auth` figuraba en `lab/ground_truth.yml` sin estar realmente
+  # plantado, de modo que el recall de §5.2.4 penalizaba al agente por no
+  # encontrar algo que no existía. Un patrón de test basta: lo que se audita es
+  # que el stream sea accesible sin credenciales, no su contenido.
+  rtsp-camera:
+    image: docker.io/linuxserver/ffmpeg:latest
+    restart: unless-stopped
+    network_mode: "service:hub"
+    depends_on: [rtsp]
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sleep 5
+        exec ffmpeg -re -stream_loop -1 \
+          -f lavfi -i "testsrc=size=640x480:rate=10" \
+          -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p \
+          -f rtsp -rtsp_transport tcp rtsp://127.0.0.1:554/live
+
+  # --- FTP con anonymous login (21 + pasivo 30000-30009) ---
+  ftp:
+    image: docker.io/stilliard/pure-ftpd:latest
+    restart: unless-stopped
+    network_mode: "service:hub"
+    depends_on: [hub]
+    environment:
+      PUBLICHOST: "172.30.0.10"
+      FTP_USER_NAME: anonymous
+      FTP_USER_PASS: anonymous
+      FTP_USER_HOME: /home/ftpusers/anonymous
+      # pure-ftpd no reconoce --anonymouslogin. -i = anonymous no puede subir.
+      ADDED_FLAGS: "-i"
+
+  # --- HTTP con banner RomPager / CWMP TR-069 (7547) ---
+  rompager:
+    image: docker.io/nginx:alpine
+    restart: unless-stopped
+    network_mode: "service:hub"
+    depends_on: [hub]
+    volumes:
+      - ./lab/rompager-default.conf:/etc/nginx/conf.d/default.conf:ro
+
+  # --- Telnet BusyBox banner Mirai-like, shell sin auth (23) ---
+  # alpine:latest dejó de incluir el applet telnetd; pin a 3.16 que sí lo trae.
+  telnet:
+    image: docker.io/alpine:3.16
+    restart: unless-stopped
+    network_mode: "service:hub"
+    depends_on: [hub]
+    command: >
+      sh -c "apk add --no-cache busybox-extras &&
+             echo 'BusyBox v1.20.2 (Mirai-target)' > /etc/issue.net &&
+             busybox-extras telnetd -F -p 23 -l /bin/sh"
+
+  # --- HTTP con paths IoT comunes y secretos expuestos (8080) ---
+  vulnhttp:
+    image: docker.io/nginx:alpine
+    restart: unless-stopped
+    network_mode: "service:hub"
+    depends_on: [hub]
+    volumes:
+      - ./lab/vulnhttp-default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./lab/vulnhttp-content:/usr/share/nginx/html:ro
+      - ./lab/vulnhttp.htpasswd:/etc/nginx/vulnhttp.htpasswd:ro
+
+  # --- TFTP con firmware "extraíble" (69/udp) ---
+  tftp:
+    image: docker.io/pghalliday/tftp:latest
+    restart: unless-stopped
+    network_mode: "service:hub"
+    depends_on: [hub]
+    volumes:
+      - ./lab/tftp-content:/var/tftpboot:ro

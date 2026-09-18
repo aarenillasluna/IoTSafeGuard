@@ -1,0 +1,26 @@
+{
+  "name": "iot-safeguard-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dashboard for IoTSafeGuard-Agent — launches FastAPI backend + Vite frontend together.",
+  "scripts": {
+    "predev": "npm run dev:free-ports && npm run langfuse:up",
+    "dev:free-ports": "./venv/bin/python scripts/free_dev_ports.py",
+    "dev": "concurrently --names api,web --prefix-colors blue,magenta --kill-others-on-fail \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "./venv/bin/python -m uvicorn api.main:app --reload --host 127.0.0.1 --port 8000",
+    "dev:web": "npm --prefix frontend run dev",
+    "build:web": "npm --prefix frontend run build",
+    "install:all": "npm install && npm --prefix frontend install",
+    "langfuse:up": "./venv/bin/python scripts/start_langfuse.py",
+    "langfuse:down": "./venv/bin/python scripts/start_langfuse.py --down",
+    "langfuse:status": "./venv/bin/python scripts/start_langfuse.py --status",
+    "langfuse:logs": "docker compose -f docker-compose.langfuse.yml logs -f --tail=100"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

@@ -1,0 +1,61 @@
+# Ground-truth del lab Docker reproducible (docker-compose.iot-lab.yml).
+#
+# Enumera los VECTORES deliberadamente plantados (8 servicios inseguros, Anexo C).
+# Lo consume `scripts/lab_scoring.py` para calcular precision/recall/F1 de un
+# informe (del agente o del baseline) contra esta verdad de campo:
+#
+#   TP = vector plantado detectado (≥1 hallazgo confirmado que casa con `match`)
+#   FN = vector plantado NO detectado
+#   FP = hallazgo confirmado que no casa con NINGÚN vector plantado (alerta espuria)
+#
+#   precision = TP / (TP + FP)      recall = TP / (TP + FN)      F1 = 2PR/(P+R)
+#
+# `match`: subcadenas (case-insensitive) sobre el id/cve/título del hallazgo.
+# Varias señales del mismo vector (p. ej. MQTT anon + wildcard + publish) cuentan
+# como UNA detección del vector, no como tres — el ground-truth es por vector.
+target: 172.30.0.10
+vectors:
+  - id: telnet-default-creds
+    service: telnet
+    port: 23
+    desc: Telnet estilo Mirai con credenciales por defecto (root:root)
+    match: ["TELNET-DEFAULT", "TELNET-MIRAI", "TELNET-EXPOSED", "TELNET-BUSYBOX"]
+  - id: modbus-no-auth
+    service: modbus
+    port: 502
+    desc: Modbus TCP sin autenticación (lectura de coils / FC17)
+    match: ["MODBUS-NO-AUTH", "MODBUS-NOAUTH", "MODBUS-READCOILS", "MODBUS-FC17"]
+  - id: mqtt-anonymous
+    service: mqtt
+    port: 1883
+    desc: Broker MQTT anónimo + wildcard subscribe + publish
+    match: ["MQTT-ANON", "MQTT-WILDCARD", "MQTT-PUB"]
+  - id: rtsp-no-auth
+    service: rtsp
+    port: 554
+    desc: Stream RTSP público sin autenticación
+    match: ["RTSP-NO-AUTH", "RTSP-NOAUTH", "RTSP-UNAUTH", "RTSP-PUBLIC", "RTSP-EXPOSED"]
+  - id: ftp-anonymous
+    service: ftp
+    port: 21
+    desc: Pure-FTPd con login anónimo
+    match: ["FTP-ANON", "FTP-ANONYMOUS"]
+  - id: cwmp-exposed
+    service: cwmp
+    port: 7547
+    desc: TR-069/CWMP (RomPager 4.07) expuesto
+    match: ["CWMP-EXPOSED", "CWMP-", "ROMPAGER", "TR-069", "CVE-2014-9222"]
+  - id: http-info-disclosure
+    service: http
+    port: 8080
+    desc: HTTP information disclosure (Boa 0.94.13, CVE-2021-33558) → cadena a admin
+    # `HTTP-CONFIG-EXPOSED` es el id que emite la capa determinista al
+    # encontrar `/config.cfg` sirviendo credenciales en claro. El vector se
+    # detectaba y se contaba como espurio por no figurar aquí.
+    match: ["CVE-2021-33558", "INFO-DISCLOSURE", "CONFIG-CFG", "ADMIN-PANEL",
+            "ADMIN-ACCESS", "HTTP-CONFIG-EXPOSED"]
+  - id: tftp-anonymous
+    service: tftp
+    port: 69
+    desc: Descarga TFTP anónima de firmware.bin/config.bin
+    match: ["TFTP-ANON", "TFTP-DOWNLOAD"]

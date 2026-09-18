@@ -1,0 +1,50 @@
+{
+  "server": {
+    "listenerAddress": "0.0.0.0",
+    "listenerPort": 502,
+    "protocol": "TCP",
+    "tlsParams": {
+      "privateKey": null,
+      "certificate": null
+    },
+    "logging": {
+      "format": "%(asctime)-15s %(threadName)-15s  %(levelname)-8s %(module)-15s:%(lineno)-8s %(message)s",
+      "logLevel": "INFO"
+    }
+  },
+  "persistence": {
+    "enabled": false,
+    "file": "/data/modbus_registers.json",
+    "saveInterval": 30
+  },
+  "metrics": {
+    "enabled": false,
+    "address": "0.0.0.0",
+    "port": 9090,
+    "path": "/metrics"
+  },
+  "registers": {
+    "description": "Valores iniciales — PLC simulado sin auth (unit id 1)",
+    "initializeUndefinedRegisters": true,
+    "discreteInput": {
+      "0": true,
+      "1": false
+    },
+    "coils": {
+      "0": true,
+      "1": true,
+      "2": false
+    },
+    "holdingRegister": {
+      "0": 4660,
+      "1": 22136,
+      "2": 100,
+      "3": 230,
+      "4": 50
+    },
+    "inputRegister": {
+      "0": 1234,
+      "1": 5678
+    }
+  }
+}

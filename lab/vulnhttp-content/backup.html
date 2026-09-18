@@ -1,0 +1,15 @@
+<!-- CVE-2021-33558 (Boa 0.94.13) info disclosure: backup de config accesible sin auth.
+     Secretos PLANTADOS para el lab — no son credenciales reales. -->
+<html><head><title>Config Backup</title></head>
+<body>
+<pre>
+# VulnRouter-X1000 configuration backup
+admin_user=admin
+admin_pass=Sup3rS3cret!2024
+admin_panel=/admin/   ; panel de administración (HTTP Basic, mismas credenciales)
+wifi_ssid=VulnIoT-Home
+wifi_psk=admin12345
+remote_mgmt=enabled
+snmp_community=private
+</pre>
+</body></html>
