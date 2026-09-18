@@ -1,0 +1,457 @@
+/* IoTSafeGuard — paleta clara cream/charcoal, sidebar lateral, sin AI-vibes.
+ * Sin frameworks. Tipografía hace el trabajo. Bordes hairline en cream.
+ * Accent teal apagado (ink-like), no el azul de templates AI. */
+
+:root {
+  /* Background: cream cálido, no white puro */
+  --bg:         #faf8f3;
+  --surface:    #f3f0e8;
+  --surface-2: #ebe7db;
+  --surface-3: #ddd7c7;
+  --line:       #ddd7c7;
+  --line-soft:  #ebe7db;
+
+  /* Texto: charcoal cálido, no black puro */
+  --text:       #2a2823;
+  --text-dim:   #6e6a5e;
+  --text-mute:  #a09a8a;
+
+  /* Accent: teal apagado tipo tinta. Funcional, no "tech-startup". */
+  --accent:        #1e645b;
+  --accent-soft:   rgba(30, 100, 91, 0.10);
+  --accent-strong: #18524b;
+
+  /* Severidades para fondo claro — bullets discretos */
+  --sev-critical: #a83a3a;
+  --sev-high:     #b06b1f;
+  --sev-medium:   #8c761a;
+  --sev-low:      #4a7a3a;
+  --sev-info:     #3a5a7a;
+  --sev-pos:      #4a7a3a;
+
+  --mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent-soft); color: var(--text); }
+
+a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  transition: border-color 80ms ease, color 80ms ease;
+}
+a:hover { border-bottom-color: var(--accent); color: var(--accent); }
+
+/* ──────────── Layout: sidebar lateral + content principal ──────────── */
+
+.layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  padding: 1.5rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar .brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  border: none;
+  padding: 0 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.sidebar .brand:hover { color: var(--accent); }
+.sidebar .brand .brand-suffix {
+  font-size: 0.68rem;
+  font-weight: 400;
+  color: var(--text-mute);
+  letter-spacing: 0;
+  text-transform: lowercase;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+.sidebar nav a {
+  display: block;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: 0;
+  transition: background 80ms ease, color 80ms ease, border-color 80ms ease;
+}
+.sidebar nav a:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+.sidebar nav a.active {
+  color: var(--accent);
+  background: var(--bg);
+  border-left-color: var(--accent);
+  font-weight: 500;
+}
+
+.sidebar-foot {
+  margin-top: auto;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.7rem;
+}
+
+.content {
+  padding: 2rem 2.5rem 4rem;
+  max-width: 1100px;
+  width: 100%;
+}
+
+/* ──────────── Tipografía editorial ──────────── */
+
+h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 2rem 0 0.75rem;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+
+.muted    { color: var(--text-dim); }
+.dim      { color: var(--text-mute); }
+
+.headline {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+.headline h2 { margin: 0; }
+.headline .tag {
+  color: var(--text-mute);
+  font-size: 0.78rem;
+  font-family: var(--mono);
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ──────────── Cards ──────────── */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+.card.flush { padding: 0; }
+.card + .card { margin-top: 1rem; }
+
+.divider {
+  border-bottom: 1px solid var(--line);
+  margin: 2rem 0;
+}
+
+/* ──────────── Tablas: hairline rows, hover crema ──────────── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+th, td {
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line-soft);
+}
+th {
+  color: var(--text-mute);
+  font-weight: 500;
+  font-size: 0.74rem;
+  border-bottom-color: var(--line);
+  letter-spacing: 0.01em;
+}
+tbody tr:hover td { background: var(--surface); }
+td.mono, th.mono { font-family: var(--mono); font-size: 0.8rem; }
+
+/* ──────────── Inputs y botones ──────────── */
+
+input[type=text], input[type=search], input[type=number], select, textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 0.45rem 0.65rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  border-radius: 2px;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+button {
+  background: var(--accent);
+  color: #faf8f3;
+  border: 1px solid var(--accent);
+  padding: 0.4rem 0.95rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 80ms ease, color 80ms ease;
+}
+button:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+button:disabled {
+  background: var(--surface-2);
+  color: var(--text-mute);
+  border-color: var(--line);
+  cursor: not-allowed;
+}
+button.secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--line);
+}
+button.secondary:hover {
+  border-color: var(--text-dim);
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* ──────────── Severidad: bullet + texto ──────────── */
+
+.sev {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  font-family: var(--mono);
+  text-transform: lowercase;
+  color: var(--text);
+}
+.sev::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-mute);
+  flex-shrink: 0;
+}
+.sev.critical::before { background: var(--sev-critical); }
+.sev.high::before     { background: var(--sev-high); }
+.sev.medium::before   { background: var(--sev-medium); }
+.sev.low::before      { background: var(--sev-low); }
+.sev.info::before     { background: var(--sev-info); }
+.sev.confirmed::before { background: var(--sev-pos); }
+.sev.dismissed::before { background: var(--text-mute); }
+.sev.dismissed         { color: var(--text-dim); }
+
+/* Tag discreto */
+.tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  margin: 0 0.25rem 0.25rem 0;
+}
+.tag.accent {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ──────────── Numbers inline ──────────── */
+
+.numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2.5rem;
+  margin: 1rem 0 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.numbers .n {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.numbers .n .value {
+  font-family: var(--mono);
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.numbers .n .label {
+  font-size: 0.74rem;
+  color: var(--text-mute);
+  text-transform: lowercase;
+}
+
+/* ──────────── Code & terminal ────────────
+ * Terminal mantiene fondo oscuro porque es un log de stdout — el contraste
+ * dark-on-cream del marco hace el log más legible que cream-on-cream. */
+
+code, .mono { font-family: var(--mono); font-size: 0.85em; }
+.kbd {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  padding: 0.05rem 0.35rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--text-dim);
+}
+
+pre.terminal {
+  background: #1c1a16;
+  color: #d4cdb8;
+  border: 1px solid var(--line);
+  padding: 1rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  max-height: 60vh;
+  overflow: auto;
+  white-space: pre;
+  border-radius: 0;
+}
+pre.terminal .line-info { color: #82a4c4; }
+pre.terminal .line-warn { color: #d8a868; }
+pre.terminal .line-err  { color: #d97070; }
+pre.terminal .line-ok   { color: #9ec27a; }
+pre.terminal .line-tool { color: #4fc0b0; }
+
+.iframe-report {
+  width: 100%;
+  height: 80vh;
+  border: 1px solid var(--line);
+  background: white;
+}
+
+/* ──────────── Helpers ──────────── */
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.row.spread { justify-content: space-between; }
+
+.stack { display: flex; flex-direction: column; gap: 0.5rem; }
+.stack-lg { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.empty {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--text-mute);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.empty strong { color: var(--text-dim); font-weight: 500; }
+
+.error {
+  border-left: 3px solid var(--sev-critical);
+  background: var(--surface);
+  padding: 0.75rem 1rem;
+  color: var(--text);
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+}
+.error strong { color: var(--sev-critical); font-weight: 600; }
+
+/* Estados de conexión */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: lowercase;
+}
+.status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-mute);
+}
+.status.live::before {
+  background: var(--sev-pos);
+  box-shadow: 0 0 0 3px rgba(74, 122, 58, 0.18);
+}
+.status.connecting::before { background: var(--sev-info); }
+.status.done::before { background: var(--accent); }
+.status.error::before { background: var(--sev-critical); }
+.status.closed::before { background: var(--text-mute); }
+
+/* dl.meta — metadatos densos */
+dl.meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1.5rem;
+  margin: 0;
+  font-size: 0.85rem;
+}
+dl.meta dt {
+  color: var(--text-mute);
+  font-weight: 400;
+  text-transform: lowercase;
+  font-size: 0.76rem;
+  padding-top: 0.1rem;
+}
+dl.meta dd {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
